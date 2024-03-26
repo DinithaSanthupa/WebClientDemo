@@ -1,6 +1,7 @@
 package cbc.webclient.controller;
 
 import cbc.webclient.model.Cat;
+import cbc.webclient.model.ClientRootResponse;
 import cbc.webclient.model.MacBookPro;
 import cbc.webclient.serviceImpl.WebClientServiceImpl;
 import org.slf4j.Logger;
@@ -17,9 +18,9 @@ public class WebController {
     @Autowired
     private WebClientServiceImpl webClientService;
     @PostMapping("/test")
-    public String test(@RequestBody MacBookPro cat){
+    public ClientRootResponse test(@RequestBody MacBookPro cat){
         logger.info("test call");
-        webClientService.addClientDetails(cat);
-        return cat.getName();
+
+        return webClientService.addClientDetails(cat);
     }
 }

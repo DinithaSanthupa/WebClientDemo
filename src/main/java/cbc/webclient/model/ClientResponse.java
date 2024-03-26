@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ClientResponse {
     @JsonProperty("client")
-    private Client client;
+    private MacBookPro client;
     private String traceNumber;
     private Integer status;
 }

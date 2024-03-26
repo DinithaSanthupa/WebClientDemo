@@ -29,37 +29,47 @@ public class WebClientServiceImpl implements WebClientService {
         this.getWebClientBuilder = getWebClientBuilder;
     }
     @Override
-    public ClientRootResponse addClientDetails(MacBookPro cat) {
+    public ClientRootResponse addClientDetails(MacBookPro macBookPro) {
 
         ClientRootResponse response = null;
         try {
             ResponseEntity<String> entity = getWebClientBuilder.build().post()
                     .uri("https://api.restful-api.dev/objects")
                     .header(HttpHeaders.CONTENT_TYPE, "application/json")
-                    .bodyValue(cat)
+                    .bodyValue(macBookPro)
                     .retrieve().toEntity(String.class)
                     .timeout(Duration.ofSeconds(timeout))
                     .block();
             if (entity != null && (!entity.getStatusCode().isError() && entity.getStatusCode().is2xxSuccessful())) {
+
+                logger.info(String.valueOf(entity));
                 String traceNumber = getTraceNo(entity.getHeaders());
+                logger.info("********************************************************");
+                logger.info(String.valueOf(entity.getHeaders()));
+                logger.info("********************************************************");
+                logger.info(entity.getStatusCode().toString());
+                logger.info("tracenumber" + traceNumber);
                 ObjectMapper objectMapper = new ObjectMapper();
                 response = objectMapper.readValue(entity.getBody(), ClientRootResponse.class);
                 response.setTraceNumber(traceNumber);
                 response.setStatus(entity.getStatusCode().value());
+                logger.info(String.valueOf(response.getStatus()));
             }else {
-                response = new ClientRootResponse();
-                response.setStatus(entity.getStatusCode().value());
-                String traceNumber = getTraceNo(entity.getHeaders());
-                response.setTraceNumber(traceNumber);
+//                response = new ClientRootResponse();
+//                response.setStatus(entity.getStatusCode().value());
+//                String traceNumber = getTraceNo(entity.getHeaders());
+//                response.setTraceNumber(traceNumber);
             }
         }catch (WebClientResponseException webEx){
             if(webEx.getRawStatusCode()!=403){
                 response = new ClientRootResponse();
                 response.setStatus(webEx.getRawStatusCode());
+                logger.error("********************************************************");
+                logger.error("WebClientResponseException");
+                logger.error(webEx.getMessage());
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            logger.info(e.getMessage());
+            logger.error(e.getMessage());
         }
         return response;
     }
