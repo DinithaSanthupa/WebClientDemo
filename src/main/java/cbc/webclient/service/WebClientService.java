@@ -1,11 +1,8 @@
 package cbc.webclient.service;
 
-import cbc.webclient.model.Cat;
-import cbc.webclient.model.ClientRootResponse;
-import cbc.webclient.model.MacBookPro;
+import cbc.webclient.model.*;
 
 public interface WebClientService {
-
-    public ClientRootResponse addClientDetails(MacBookPro cat);
+    public FeedBackResponse getFeedBack(FeedbackRequest feedbackRequest);
 
 }

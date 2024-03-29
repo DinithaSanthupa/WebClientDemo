@@ -1,9 +1,7 @@
 package cbc.webclient.serviceImpl;
 
 import cbc.webclient.controller.WebController;
-import cbc.webclient.model.Cat;
-import cbc.webclient.model.ClientRootResponse;
-import cbc.webclient.model.MacBookPro;
+import cbc.webclient.model.*;
 import cbc.webclient.service.WebClientService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -28,57 +26,65 @@ public class WebClientServiceImpl implements WebClientService {
     public WebClientServiceImpl(WebClient.Builder getWebClientBuilder) {
         this.getWebClientBuilder = getWebClientBuilder;
     }
-    @Override
-    public ClientRootResponse addClientDetails(MacBookPro macBookPro) {
 
-        ClientRootResponse response = null;
-        try {
+    public FeedBackResponse getFeedBack(FeedbackRequest feedbackRequest){
+
+        FeedBackResponse feedBackResponse = null;
+
+        try{
             ResponseEntity<String> entity = getWebClientBuilder.build().post()
-                    .uri("https://api.restful-api.dev/objects")
+                    .uri("https://87c9ada9-844e-4b87-8dc9-cb02ec4267e3.mock.pstmn.io/feedback")
                     .header(HttpHeaders.CONTENT_TYPE, "application/json")
-                    .bodyValue(macBookPro)
+                    .bodyValue(feedbackRequest)
                     .retrieve().toEntity(String.class)
                     .timeout(Duration.ofSeconds(timeout))
                     .block();
-            if (entity != null && (!entity.getStatusCode().isError() && entity.getStatusCode().is2xxSuccessful())) {
 
-                logger.info(String.valueOf(entity));
-                String traceNumber = getTraceNo(entity.getHeaders());
-                logger.info("********************************************************");
-                logger.info(String.valueOf(entity.getHeaders()));
-                logger.info("********************************************************");
-                logger.info(entity.getStatusCode().toString());
-                logger.info("tracenumber" + traceNumber);
+            logger.info("Service: {}, info: {}","getFeedBack",entity);
+            assert entity != null;
+            logger.info("getStatusCode = " + entity.getStatusCode().toString());
+            logger.info("getStatusCode isError = " + String.valueOf(entity.getStatusCode().isError()));
+            logger.info("getStatusCode is2xxSuccessful = " + String.valueOf(entity.getStatusCode().is2xxSuccessful()));
+
+            if(entity != null && (!entity.getStatusCode().isError() && entity.getStatusCode().is2xxSuccessful())){
+
                 ObjectMapper objectMapper = new ObjectMapper();
-                response = objectMapper.readValue(entity.getBody(), ClientRootResponse.class);
-                response.setTraceNumber(traceNumber);
-                response.setStatus(entity.getStatusCode().value());
-                logger.info(String.valueOf(response.getStatus()));
-            }else {
-//                response = new ClientRootResponse();
-//                response.setStatus(entity.getStatusCode().value());
-//                String traceNumber = getTraceNo(entity.getHeaders());
-//                response.setTraceNumber(traceNumber);
-            }
-        }catch (WebClientResponseException webEx){
-            if(webEx.getRawStatusCode()!=403){
-                response = new ClientRootResponse();
-                response.setStatus(webEx.getRawStatusCode());
-                logger.error("********************************************************");
-                logger.error("WebClientResponseException");
-                logger.error(webEx.getMessage());
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        }
-        return response;
-    }
+                feedBackResponse = objectMapper.readValue(entity.getBody(), FeedBackResponse.class);
+                FeedBackRootResponse feedBackRootResponse = new FeedBackRootResponse();
+                feedBackRootResponse.setFeedBackResponse(feedBackResponse);
+                feedBackRootResponse.setStatusCode(entity.getStatusCode().value());
+                logger.info("feedBackResponse" + String.valueOf(feedBackResponse));
+                logger.info("feedBackRootResponse " + feedBackRootResponse);
 
-    private String getTraceNo(HttpHeaders headers){
-        if (headers!=null && headers.get("TraceNumber")!=null){
-            return headers.get("TraceNumber").get(0);
+            }else{
+
+                FeedBackRootResponse feedBackRootResponse = new FeedBackRootResponse();
+                FeedBackResponse response = new FeedBackResponse();
+                response.setMessage("Feedback not submitted");
+                feedBackRootResponse.setFeedBackResponse(response);
+                feedBackRootResponse.setStatusCode(entity.getStatusCode().value());
+                logger.info("feedBackResponse" + String.valueOf(feedBackResponse));
+                logger.info("feedBackRootResponse " + feedBackRootResponse);
+                feedBackResponse = response;
+
+            }
+
+        }catch (WebClientResponseException webEx){
+            if(webEx.getRawStatusCode()!=403) {
+                FeedBackResponse response = new FeedBackResponse();
+                response.setMessage(webEx.getMessage());
+                feedBackResponse = response;
+                logger.error("Service Error: {}, trace: {}", "getFeedBack ", webEx.getMessage());
+            }
         }
-        return "";
+        catch (Exception ex){
+            FeedBackResponse response = new FeedBackResponse();
+            response.setMessage(ex.getMessage());
+            feedBackResponse = response;
+            logger.error("Service Error: {}, trace: {}","getFeedBack ",ex.getMessage());
+        }
+
+        return feedBackResponse;
     }
 
 
