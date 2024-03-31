@@ -1,8 +1,8 @@
 package cbc.webclient.serviceImpl;
 
-import cbc.webclient.controller.WebController;
 import cbc.webclient.model.*;
 import cbc.webclient.service.WebClientService;
+import cbc.webclient.util.Token;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +27,7 @@ public class WebClientServiceImpl implements WebClientService {
         this.getWebClientBuilder = getWebClientBuilder;
     }
 
+    @Override
     public FeedBackResponse getFeedBack(FeedbackRequest feedbackRequest){
 
         FeedBackResponse feedBackResponse = null;
@@ -86,7 +87,68 @@ public class WebClientServiceImpl implements WebClientService {
 
         return feedBackResponse;
     }
+    @Override
+    public ChatRootResponse getChatResponse(String query) {
 
+        ChatRootResponse chatRootResponse = null;
 
+        ChatRequest chatRequest = new ChatRequest();
+        chatRequest.setQuery(query);
+
+        Token token = new Token();
+        chatRequest.setToken(token.generateToken());
+
+        try{
+            ResponseEntity<String> entity = getWebClientBuilder.build().post()
+                    .uri("https://2aa6d7b7-6431-4e9a-a8e2-a373373105b8.mock.pstmn.io/chat")
+                    .header(HttpHeaders.CONTENT_TYPE, "application/json")
+                    .bodyValue(chatRequest)
+                    .retrieve().toEntity(String.class)
+                    .timeout(Duration.ofSeconds(timeout))
+                    .block();
+
+            logger.info("Service: {}, info: {}","getChatHiResponse",entity);
+            assert entity != null;
+            logger.info("getStatusCode = " + entity.getStatusCode().toString());
+            logger.info("getStatusCode isError = " + String.valueOf(entity.getStatusCode().isError()));
+            logger.info("getStatusCode is2xxSuccessful = " + String.valueOf(entity.getStatusCode().is2xxSuccessful()));
+
+            if(entity != null && (!entity.getStatusCode().isError() && entity.getStatusCode().is2xxSuccessful())){
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                ChatResponse chatResponse = new ChatResponse();
+                chatResponse = objectMapper.readValue(entity.getBody(), ChatResponse.class);
+                logger.info("getChatHiResponse" + String.valueOf(chatResponse));
+                chatRootResponse = new ChatRootResponse();
+                chatRootResponse.setChatResponse(chatResponse);
+                chatRootResponse.setStatusCode(entity.getStatusCode().value());
+                logger.info("getChatHiResponse" + String.valueOf(chatResponse));
+                logger.info("getChatHiRootResponse " + chatRootResponse);
+
+            }else{
+
+                chatRootResponse = new ChatRootResponse();
+                chatRootResponse.setStatusMessage("Message not send successfully");
+                chatRootResponse.setStatusCode(entity.getStatusCode().value());
+                logger.info("chatHiRootResponse " + chatRootResponse);
+            }
+
+        }catch (WebClientResponseException webEx){
+            if(webEx.getRawStatusCode()!=403) {
+                logger.error("Service Error: {}, trace: {}", "getChatHiResponse ", webEx.getMessage());
+                chatRootResponse = new ChatRootResponse();
+                chatRootResponse.setStatusMessage(webEx.getMessage());
+                chatRootResponse.setStatusMessage(" "+ webEx.getMessage());
+            }
+        }
+        catch (Exception ex){
+            logger.error("Service Error: {}, trace: {}", "getChatHiResponse ", ex.getMessage());
+            chatRootResponse = new ChatRootResponse();
+            chatRootResponse.setStatusMessage(ex.getMessage());
+            chatRootResponse.setStatusMessage(" "+ ex.getMessage());
+        }
+
+        return chatRootResponse;
+    }
 
 }

@@ -1,5 +1,9 @@
 package cbc.webclient.util;
 
+import cbc.webclient.serviceImpl.WebClientServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
@@ -8,10 +12,12 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class Token {
-    public void generateToken() {
+    Logger logger = LoggerFactory.getLogger(Token.class);
+    public String generateToken() {
         String sharedKey = "Com-c";
         String secretKey = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         String message = sharedKey;
+        String token = "";
 
         try {
             // Getting an HMAC-SHA-256 Mac instance
@@ -27,10 +33,11 @@ public class Token {
                 if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
-            String token = hexString.toString();
-            System.out.println("Token: " + token);
+            token = hexString.toString();
+            logger.info("Token: " + token);
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            e.printStackTrace();
+            logger.info("Exception " + e.getMessage());
         }
+        return token;
     }
 }

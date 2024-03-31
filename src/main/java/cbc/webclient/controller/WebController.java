@@ -21,4 +21,10 @@ public class WebController {
         logger.info("Action: {}, info: {}", "feedback request", feedbackRequest);
         return webClientService.getFeedBack(feedbackRequest);
     }
+
+    @PostMapping("/chat")
+    public ChatRootResponse getChatHiResponse(@RequestBody ChatMessage chatMessage){
+        logger.info("Action: {}, info: {}", "HiMessage request", chatMessage);
+        return webClientService.getChatResponse(chatMessage.getQuery());
+    }
 }
