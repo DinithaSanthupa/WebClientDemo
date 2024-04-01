@@ -7,6 +7,7 @@ public class FeedBackRootResponse {
 
     private Integer statusCode;
     private FeedBackResponse feedBackResponse;
+    private String statusMessage;
 
 
 }

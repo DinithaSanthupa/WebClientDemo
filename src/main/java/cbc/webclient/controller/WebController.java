@@ -17,7 +17,7 @@ public class WebController {
     private WebClientServiceImpl webClientService;
 
     @PostMapping("/feedback")
-    public FeedBackResponse getFeedBack(@RequestBody FeedbackRequest feedbackRequest){
+    public FeedBackRootResponse getFeedBack(@RequestBody FeedbackRequest feedbackRequest){
         logger.info("Action: {}, info: {}", "feedback request", feedbackRequest);
         return webClientService.getFeedBack(feedbackRequest);
     }
