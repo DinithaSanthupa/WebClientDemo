@@ -17,14 +17,14 @@ public class WebController {
     private WebClientServiceImpl webClientService;
 
     @PostMapping("/feedback")
-    public FeedBackRootResponse getFeedBack(@RequestBody FeedbackRequest feedbackRequest){
+    public FeedBackResponse getFeedBack(@RequestBody FeedbackRequest feedbackRequest){
         logger.info("Action: {}, info: {}", "feedback request", feedbackRequest);
-        return webClientService.getFeedBack(feedbackRequest);
+        return webClientService.getFeedBack(feedbackRequest).getFeedBackResponse();
     }
 
     @PostMapping("/chat")
-    public ChatRootResponse getChatHiResponse(@RequestBody ChatMessage chatMessage){
+    public ChatResponse getChatHiResponse(@RequestBody ChatMessage chatMessage){
         logger.info("Action: {}, info: {}", "HiMessage request", chatMessage);
-        return webClientService.getChatResponse(chatMessage.getQuery());
+        return webClientService.getChatResponse(chatMessage.getQuery()).getChatResponse();
     }
 }
