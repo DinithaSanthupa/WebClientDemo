@@ -12,7 +12,21 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class Token {
-    Logger logger = LoggerFactory.getLogger(Token.class);
+    static Logger logger = LoggerFactory.getLogger(Token.class);
+
+    private static volatile Token instance;
+
+    public static Token getInstance() {
+        if (instance == null) {
+            synchronized (Token.class) {
+                if (instance == null) {
+                    instance = new Token();
+                }
+            }
+        }
+        return instance;
+    }
+
     public String generateToken() {
         String sharedKey = "Com-c";
         String secretKey = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));

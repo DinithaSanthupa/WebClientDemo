@@ -103,8 +103,7 @@ public class WebClientServiceImpl implements WebClientService {
         ChatRequest chatRequest = new ChatRequest();
         chatRequest.setQuery(query);
 
-        Token token = new Token();
-        chatRequest.setToken(token.generateToken());
+        chatRequest.setToken(Token.getInstance().generateToken());
 
         try{
             ResponseEntity<String> entity = getWebClientBuilder.build().post()
